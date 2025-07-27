@@ -11,6 +11,6 @@ namespace BookExchange.Domain.Core
         public int Id { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        public bool IsDeleted { get; set; } // Para borrado lógico
+        public bool IsDeleted { get; set; } 
     }
 }
