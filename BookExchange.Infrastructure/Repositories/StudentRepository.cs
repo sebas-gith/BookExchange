@@ -1,11 +1,7 @@
-﻿using BookExchange.Domain.Core;
+﻿using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using BookExchange.Infrastructure.Context;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using BookExchange.Domain.Entities;
 
 namespace BookExchange.Infrastructure.Repositories
 {

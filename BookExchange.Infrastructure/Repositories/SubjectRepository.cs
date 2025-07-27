@@ -1,7 +1,6 @@
 ﻿using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using BookExchange.Infrastructure.Context;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookExchange.Infrastructure.Repositories

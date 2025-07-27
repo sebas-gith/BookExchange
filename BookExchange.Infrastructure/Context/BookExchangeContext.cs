@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using BookExchange.Domain.Core; // Para Student
-using BookExchange.Domain.Entities; // Para Book, Subject, ExchangeOffer, Message, Review
+﻿using BookExchange.Domain.Entities; // Para Book, Subject, ExchangeOffer, Message, Review
+using Microsoft.EntityFrameworkCore;
 
 namespace BookExchange.Infrastructure.Context
 {

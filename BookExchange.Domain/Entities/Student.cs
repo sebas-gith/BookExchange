@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using BookExchange.Domain.Core;
-using System.Collections.Generic; // Para las colecciones de navegación
+﻿using BookExchange.Domain.Core;
 
 namespace BookExchange.Domain.Entities// O BookExchange.Domain.Entities si lo mueves
 {
