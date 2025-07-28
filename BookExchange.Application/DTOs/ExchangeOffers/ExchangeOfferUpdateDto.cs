@@ -5,6 +5,8 @@ namespace BookExchange.Application.DTOs.ExchangeOffers
 {
     public class ExchangeOfferUpdateDto
     {
+        [Required(ErrorMessage = "El ID del vendedor es obligatorio.")]
+        public int SellerId { get; set; }
         [Required(ErrorMessage = "El ID de la oferta es obligatorio para la actualización.")]
         public int Id { get; set; }
 

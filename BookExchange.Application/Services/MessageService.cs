@@ -5,6 +5,7 @@ using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BookExchange.Application.Contracts;
 
 namespace BookExchange.Application.Services
 {
@@ -23,11 +24,11 @@ namespace BookExchange.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<MessageDto> SendMessageAsync(MessageCreateDto createDto, int senderId)
+        public async Task<MessageDto> SendMessageAsync(MessageCreateDto createDto)
         {
             // Validar remitente y receptor
-            var sender = await _studentRepository.GetByIdAsync(senderId);
-            if (sender == null) throw new Exceptions.ApplicationException($"Remitente (StudentId) con ID {senderId} no encontrado.");
+            var sender = await _studentRepository.GetByIdAsync(createDto.SenderId);
+            if (sender == null) throw new Exceptions.ApplicationException($"Remitente (StudentId) con ID {createDto.SenderId} no encontrado.");
 
             var receiver = await _studentRepository.GetByIdAsync(createDto.ReceiverId);
             if (receiver == null) throw new Exceptions.ApplicationException($"Receptor (StudentId) con ID {createDto.ReceiverId} no encontrado.");
@@ -43,7 +44,7 @@ namespace BookExchange.Application.Services
             }
 
             var message = _mapper.Map<Message>(createDto);
-            message.SenderId = senderId;
+            message.SenderId = createDto.SenderId;
             message.SentDate = DateTime.UtcNow;
             message.IsRead = false; // Por defecto no leído
 

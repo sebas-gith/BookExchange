@@ -5,6 +5,7 @@ using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BookExchange.Application.Contracts;
 
 namespace BookExchange.Application.Services
 {
@@ -23,7 +24,7 @@ namespace BookExchange.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<ExchangeOfferDto> CreateOfferAsync(ExchangeOfferCreateDto createDto, int sellerId)
+        public async Task<ExchangeOfferDto> CreateOfferAsync(ExchangeOfferCreateDto createDto)
         {
             // Validar si el libro existe
             var bookExists = await _bookRepository.GetByIdAsync(createDto.BookId);
@@ -33,20 +34,20 @@ namespace BookExchange.Application.Services
             }
 
             // Validar si el vendedor existe
-            var sellerExists = await _studentRepository.GetByIdAsync(sellerId);
+            var sellerExists = await _studentRepository.GetByIdAsync(createDto.SellerId);
             if (sellerExists == null)
             {
-                throw new Exceptions.ApplicationException($"El vendedor (StudentId) con ID {sellerId} no existe.");
+                throw new Exceptions.ApplicationException($"El vendedor (StudentId) con ID {createDto.SellerId} no existe.");
             }
 
             // Asegurarse de que el libro que se ofrece realmente pertenece al vendedor
-            if (bookExists.OwnerId != sellerId)
+            if (bookExists.OwnerId != createDto.SellerId)
             {
-                throw new Exceptions.ApplicationException($"El libro con ID {createDto.BookId} no pertenece al vendedor con ID {sellerId}.");
+                throw new Exceptions.ApplicationException($"El libro con ID {createDto.BookId} no pertenece al vendedor con ID {createDto.SellerId}.");
             }
 
             var offer = _mapper.Map<ExchangeOffer>(createDto);
-            offer.SellerId = sellerId;
+            offer.SellerId = createDto.SellerId;
             offer.PostedDate = DateTime.UtcNow;
             offer.Status = OfferStatus.Active; // Por defecto, una nueva oferta está activa
 

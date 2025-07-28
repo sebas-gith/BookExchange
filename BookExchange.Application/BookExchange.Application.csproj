@@ -16,8 +16,4 @@
     <ProjectReference Include="..\BookExchange.Infrastructure\BookExchange.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="DTOs\Reviews\" />
-  </ItemGroup>
-
 </Project>

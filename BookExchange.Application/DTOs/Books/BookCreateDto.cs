@@ -9,6 +9,8 @@ namespace BookExchange.Application.DTOs.Books
         [StringLength(250)]
         public string Title { get; set; }
 
+        [Required(ErrorMessage = "El ID del propietario es obligatorio.")]
+        public int OwnerId { get; set; } // Añadimos esto
         [Required]
         [StringLength(250)]
         public string Author { get; set; }

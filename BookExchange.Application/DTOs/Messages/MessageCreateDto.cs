@@ -4,6 +4,8 @@ namespace BookExchange.Application.DTOs.Messages
 {
     public class MessageCreateDto
     {
+        [Required(ErrorMessage = "El ID del remitente es obligatorio.")]
+        public int SenderId { get; set; } 
         [Required(ErrorMessage = "El ID del receptor es obligatorio.")]
         public int ReceiverId { get; set; }
 
