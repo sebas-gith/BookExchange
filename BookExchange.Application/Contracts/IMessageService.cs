@@ -1,4 +1,4 @@
-﻿using BookExchange.Application.DTOs.Messages; // Asegúrate de crear este DTO
+﻿using BookExchange.Application.DTOs.Messages; 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
