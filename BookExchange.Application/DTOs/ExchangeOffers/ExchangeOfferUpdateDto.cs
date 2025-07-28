@@ -1,10 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using BookExchange.Domain.Entities; // Para OfferType
+using BookExchange.Domain.Entities; // Para OfferType, OfferStatus
 
 namespace BookExchange.Application.DTOs.ExchangeOffers
 {
-    public class ExchangeOfferCreateDto
+    public class ExchangeOfferUpdateDto
     {
+        [Required(ErrorMessage = "El ID de la oferta es obligatorio para la actualización.")]
+        public int Id { get; set; }
+
         [Required(ErrorMessage = "El ID del libro es obligatorio.")]
         public int BookId { get; set; }
 
@@ -21,5 +24,8 @@ namespace BookExchange.Application.DTOs.ExchangeOffers
         public string Location { get; set; }
 
         public DateTime? ExpirationDate { get; set; } // Opcional
+
+        [Required(ErrorMessage = "El estado de la oferta es obligatorio.")]
+        public OfferStatus Status { get; set; }
     }
 }

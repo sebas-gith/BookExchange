@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
-namespace BookExchange.Application.Services
+namespace BookExchange.Application.Contracts
 {
     public interface IStudentService
     {
@@ -11,5 +11,6 @@ namespace BookExchange.Application.Services
         Task<IEnumerable<StudentDto>> GetAllStudentsAsync();
         Task UpdateStudentAsync(StudentUpdateDto updateDto);
         Task DeleteStudentAsync(int studentId);
-        Task<StudentDto> GetStudentByEmailAsync(string email);     }
+        Task<StudentDto> GetStudentByEmailAsync(string email);    
+    }
 }
