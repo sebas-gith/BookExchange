@@ -3,11 +3,11 @@ using BookExchange.Domain.Entities; // Para OfferStatus en el filtro
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BookExchange.Application.Services
+namespace BookExchange.Application.Contracts
 {
     public interface IExchangeOfferService
     {
-        Task<ExchangeOfferDto> CreateOfferAsync(ExchangeOfferCreateDto createDto, int sellerId);
+        Task<ExchangeOfferDto> CreateOfferAsync(ExchangeOfferCreateDto createDto); 
         Task<ExchangeOfferDto> GetOfferByIdAsync(int offerId);
         Task<IEnumerable<ExchangeOfferDto>> GetAllOffersAsync();
         Task UpdateOfferAsync(ExchangeOfferUpdateDto updateDto);

@@ -4,6 +4,8 @@ namespace BookExchange.Application.DTOs.Reviews
 {
     public class ReviewCreateDto
     {
+        [Required(ErrorMessage = "El ID del revisor es obligatorio.")]
+        public int ReviewerId { get; set; } // Añadimos esto
         [Required(ErrorMessage = "El ID del usuario a reseñar es obligatorio.")]
         public int ReviewedUserId { get; set; }
 

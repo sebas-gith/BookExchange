@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BookExchange.Application.Services
+namespace BookExchange.Application.Contracts
 {
     public interface IBookService
     {
-        Task<BookDto> CreateBookAsync(BookCreateDto createDto, int ownerId); // ownerId viene del usuario autenticado
+        // ...
+        Task<BookDto> CreateBookAsync(BookCreateDto createDto); // Sin ownerId separado
         Task<BookDto> GetBookByIdAsync(int bookId);
         Task<IEnumerable<BookDto>> GetAllBooksAsync();
         Task UpdateBookAsync(BookUpdateDto updateDto); // Necesitarías un BookUpdateDto similar a StudentUpdateDto

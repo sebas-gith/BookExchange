@@ -8,6 +8,7 @@ using BCrypt.Net; // Para hashear contraseñas
 using BookExchange.Domain.Entities;
 using BookExchange.Application.Contracts;
 
+
 namespace BookExchange.Application.Services
 {
     public class StudentService : IStudentService

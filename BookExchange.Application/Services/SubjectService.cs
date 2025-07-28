@@ -6,6 +6,7 @@ using BookExchange.Domain.Interfaces;
 using BookExchange.Infrastructure.Repositories;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BookExchange.Application.Contracts;
 
 namespace BookExchange.Application.Services
 {

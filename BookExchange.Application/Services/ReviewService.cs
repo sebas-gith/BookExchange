@@ -5,6 +5,7 @@ using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using BookExchange.Application.Contracts;
 
 namespace BookExchange.Application.Services
 {
@@ -23,18 +24,18 @@ namespace BookExchange.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<ReviewDto> CreateReviewAsync(ReviewCreateDto createDto, int reviewerId)
+        public async Task<ReviewDto> CreateReviewAsync(ReviewCreateDto createDto)
         {
             // Validar que el reviewer existe
-            var reviewer = await _studentRepository.GetByIdAsync(reviewerId);
-            if (reviewer == null) throw new Exceptions.ApplicationException($"El revisor (StudentId) con ID {reviewerId} no existe.");
+            var reviewer = await _studentRepository.GetByIdAsync(createDto.ReviewerId);
+            if (reviewer == null) throw new Exceptions.ApplicationException($"El revisor (StudentId) con ID {createDto.ReviewerId} no existe.");
 
             // Validar que el usuario a reseñar existe
             var reviewedUser = await _studentRepository.GetByIdAsync(createDto.ReviewedUserId);
             if (reviewedUser == null) throw new Exceptions.ApplicationException($"El usuario a reseñar (ReviewedUserId) con ID {createDto.ReviewedUserId} no existe.");
 
             // Evitar que un usuario se reseñe a sí mismo
-            if (reviewerId == createDto.ReviewedUserId)
+            if (createDto.ReviewerId == createDto.ReviewedUserId)
             {
                 throw new ValidationException("No puedes reseñarte a ti mismo.");
             }
@@ -52,7 +53,7 @@ namespace BookExchange.Application.Services
 
             // Opcional: Prevenir múltiples reviews del mismo reviewer al mismo reviewedUser para la misma oferta
             var existingReview = await _reviewRepository.FindAsync(r =>
-                r.ReviewerId == reviewerId &&
+                r.ReviewerId == createDto.ReviewerId &&
                 r.ReviewedUserId == createDto.ReviewedUserId &&
                 r.ExchangeOfferId == createDto.ExchangeOfferId);
 
@@ -63,7 +64,7 @@ namespace BookExchange.Application.Services
 
 
             var review = _mapper.Map<Review>(createDto);
-            review.ReviewerId = reviewerId;
+            review.ReviewerId = createDto.ReviewerId;
             review.ReviewDate = DateTime.UtcNow;
 
             await _reviewRepository.AddAsync(review);

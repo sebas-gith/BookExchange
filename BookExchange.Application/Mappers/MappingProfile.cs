@@ -35,9 +35,10 @@ namespace BookExchange.Application.Mappers
                 .ForMember(dest => dest.OwnerLastName, opt => opt.MapFrom(src => src.Owner.LastName));
 
             // BookUpdateDto -> Book
+            CreateMap<BookCreateDto, Book>(); // Ya no ignoramos OwnerId
+                                              // Asegúrate de que BookUpdateDto también se mapee correctamente
             CreateMap<BookUpdateDto, Book>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()); // Id se usa para buscar, no para mapear a la entidad directamente
-
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             // Subject Mappings
             CreateMap<SubjectCreateDto, Subject>();
             CreateMap<SubjectUpdateDto, Subject>()

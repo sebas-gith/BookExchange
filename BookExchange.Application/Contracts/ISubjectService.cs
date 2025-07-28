@@ -1,8 +1,8 @@
-﻿using BookExchange.Application.DTOs.Subjects; // Asegúrate de crear este DTO
+﻿using BookExchange.Application.DTOs.Subjects; 
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BookExchange.Application.Services
+namespace BookExchange.Application.Contracts
 {
     public interface ISubjectService
     {

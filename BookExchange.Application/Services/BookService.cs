@@ -4,6 +4,7 @@ using BookExchange.Application.Exceptions; // Para usar ApplicationException
 using BookExchange.Domain.Entities;
 using BookExchange.Domain.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using BookExchange.Application.Contracts;
 
 namespace BookExchange.Application.Services
 {
@@ -22,7 +23,7 @@ namespace BookExchange.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<BookDto> CreateBookAsync(BookCreateDto createDto, int ownerId)
+        public async Task<BookDto> CreateBookAsync(BookCreateDto createDto)
         {
             // Validar si la materia existe
             var subjectExists = await _subjectRepository.GetByIdAsync(createDto.SubjectId);
@@ -32,10 +33,10 @@ namespace BookExchange.Application.Services
             }
 
             // Validar si el propietario (ownerId) existe
-            var ownerExists = await _studentRepository.GetByIdAsync(ownerId);
+            var ownerExists = await _studentRepository.GetByIdAsync(createDto.OwnerId);
             if (ownerExists == null)
             {
-                throw new Exceptions.ApplicationException($"El propietario (StudentId) con ID {ownerId} no existe.");
+                throw new Exceptions.ApplicationException($"El propietario (StudentId) con ID {createDto.OwnerId} no existe.");
             }
 
             // Verificar si el ISBN ya existe para evitar duplicados
@@ -47,7 +48,6 @@ namespace BookExchange.Application.Services
 
 
             var book = _mapper.Map<Book>(createDto);
-            book.OwnerId = ownerId; // Asignar el OwnerId del usuario autenticado
 
             await _bookRepository.AddAsync(book);
             await _bookRepository.SaveChangesAsync();
