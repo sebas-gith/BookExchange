@@ -1,6 +1,4 @@
 ﻿using BookExchange.Domain.Entities; // Necesario para ExchangeOffer
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace BookExchange.Domain.Interfaces
 {

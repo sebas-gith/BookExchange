@@ -1,8 +1,5 @@
-﻿using BookExchange.Domain.Core; 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.Linq.Expressions; 
-using System; 
+﻿using BookExchange.Domain.Core;
+using System.Linq.Expressions;
 
 namespace BookExchange.Domain.Interfaces
 {
