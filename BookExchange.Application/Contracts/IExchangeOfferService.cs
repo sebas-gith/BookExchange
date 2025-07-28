@@ -1,4 +1,4 @@
-﻿using BookExchange.Application.DTOs.ExchangeOffers; // Asegúrate de crear estos DTOs
+﻿using BookExchange.Application.DTOs.ExchangeOffers; 
 using BookExchange.Domain.Entities; // Para OfferStatus en el filtro
 using System.Collections.Generic;
 using System.Threading.Tasks;
