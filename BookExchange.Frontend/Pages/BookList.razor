@@ -1,0 +1,56 @@
+﻿@page "/books"
+@using BookExchange.Application.DTOs.Books
+@using BookExchange.Frontend.Services
+@inject BookService BookService
+@inject NavigationManager Navigation
+
+<h3>Catálogo de Libros 📚</h3>
+
+@if (books == null)
+{
+    <p><em>Cargando libros...</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Condición</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var book in books)
+            {
+                <tr>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.Condition</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => ViewDetails(book.Id)">
+                            Ver Detalles
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private BookDto[] books;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Al iniciar el componente, llama al servicio para obtener los datos
+        books = await BookService.GetBooksAsync();
+    }
+
+    private void ViewDetails(int bookId)
+    {
+        // Navega a la página de detalles del libro
+        Navigation.NavigateTo($"/books/{bookId}");
+    }
+}
