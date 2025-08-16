@@ -45,14 +45,13 @@ namespace BookExchange.Api.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> CreateBook([FromBody] BookCreateDto createDto)
         {
-            // El OwnerId ahora viene del DTO
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
             try
             {
-                var book = await _bookService.CreateBookAsync(createDto); // Sin ownerId separado
+                var book = await _bookService.CreateBookAsync(createDto);
                 return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
             }
             catch (Application.Exceptions.ApplicationException ex)
@@ -65,7 +64,7 @@ namespace BookExchange.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)] // Mantenemos este tipo de respuesta si el servicio lanza UnauthorizedAccessException
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] BookUpdateDto updateDto)
         {
             if (id != updateDto.Id)
@@ -80,14 +79,14 @@ namespace BookExchange.Api.Controllers
 
             try
             {
-                await _bookService.UpdateBookAsync(updateDto); // El servicio se encargará de la validación del propietario
+                await _bookService.UpdateBookAsync(updateDto); 
                 return Ok(new { message = "Libro actualizado exitosamente." });
             }
             catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-            catch (UnauthorizedAccessException ex) // Captura la excepción de autorización del servicio
+            catch (UnauthorizedAccessException ex) 
             {
                 return Forbid(ex.Message); // Retorna 403 Forbidden
             }

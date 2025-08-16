@@ -23,15 +23,10 @@ namespace BookExchange.Application.DTOs.Books
         // Clave foránea para la Materia/Categoría
         public int SubjectId { get; set; }
         // Propiedad de navegación a la Materia/Categoría
-        public Subject Subject { get; set; }
 
         // Clave foránea al Student que lo posee/publica
         public int OwnerId { get; set; } // Renombrado de UserId a OwnerId para mayor claridad
         // Propiedad de navegación al Student propietario
-        public Student Owner { get; set; }
-
-        // Propiedades de navegación (un libro puede tener múltiples ofertas)
-        public ICollection<ExchangeOffer> ExchangeOffers { get; set; }
 
     }
 }

@@ -14,7 +14,7 @@ namespace BookExchange.Application.Contracts
         Task DeleteOfferAsync(int offerId);
         Task<IEnumerable<ExchangeOfferDto>> GetActiveOffersForBookAsync(int bookId);
         Task<IEnumerable<ExchangeOfferDto>> GetOffersBySellerIdAsync(int sellerId);
-        Task<IEnumerable<ExchangeOfferDto>> SearchOffersAsync(OfferSearchDto searchDto); // DTO para filtros de búsqueda
+        Task<IEnumerable<ExchangeOfferDto>> SearchOffersAsync(OfferSearchDto searchDto); 
         Task UpdateOfferStatusAsync(int offerId, OfferStatus newStatus);
     }
 }

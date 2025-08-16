@@ -7,6 +7,6 @@ namespace BookExchange.Application
     public interface IAuthService
     {
         Task<StudentDto> RegisterAsync(StudentRegisterDto registerDto);
-        Task<StudentDto> LoginAsync(LoginDto loginDto); // Ya no devuelve AuthResponseDto
+        Task<StudentDto> LoginAsync(LoginDto loginDto); 
     }
 }

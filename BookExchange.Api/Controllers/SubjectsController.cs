@@ -44,7 +44,6 @@ namespace BookExchange.Api.Controllers
         }
 
         // POST: api/Subjects
-        // Solo para administradores o un sistema de gestión interno
         [HttpPost]
         [ProducesResponseType(typeof(SubjectDto), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -66,7 +65,6 @@ namespace BookExchange.Api.Controllers
         }
 
         // PUT: api/Subjects/5
-        // Solo para administradores o un sistema de gestión interno
         [HttpPut("{id}")]
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -97,7 +95,6 @@ namespace BookExchange.Api.Controllers
         }
 
         // DELETE: api/Subjects/5
-        // Solo para administradores o un sistema de gestión interno
         [HttpDelete("{id}")]
         [ProducesResponseType((int)HttpStatusCode.NoContent)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]

@@ -11,7 +11,7 @@ namespace BookExchange.Infrastructure.Repositories
         {
         }
 
-        // Implementación de métodos específicos para Message
+        
         public async Task<IEnumerable<Message>> GetMessagesBetweenUsersAsync(int userId1, int userId2)
         {
             return await _dbSet
@@ -35,7 +35,7 @@ namespace BookExchange.Infrastructure.Repositories
             if (message != null)
             {
                 message.IsRead = true;
-                // No llamamos SaveChangesAsync aquí, se espera que se haga a nivel de la unidad de trabajo o servicio.
+                
             }
         }
     }

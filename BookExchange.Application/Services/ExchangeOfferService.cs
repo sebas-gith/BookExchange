@@ -67,8 +67,10 @@ namespace BookExchange.Application.Services
 
         public async Task<IEnumerable<ExchangeOfferDto>> GetAllOffersAsync()
         {
-            // Podrías considerar una paginación o filtros por defecto para evitar cargar todo
-            var offers = await _offerRepository.GetAllAsync();
+            // Llama al nuevo método que incluye los detalles
+            var offers = await _offerRepository.GetAllOffersWithDetailsAsync();
+
+            // El mapeo ahora funcionará correctamente porque las propiedades de navegación están cargadas
             return _mapper.Map<IEnumerable<ExchangeOfferDto>>(offers);
         }
 
@@ -134,10 +136,18 @@ namespace BookExchange.Application.Services
         }
 
         public async Task<IEnumerable<ExchangeOfferDto>> SearchOffersAsync(OfferSearchDto searchDto)
-        {
-            var offers = await _offerRepository.GetOffersFilteredAsync(searchDto.MinPrice, searchDto.MaxPrice, searchDto.SubjectId, searchDto.Condition?.ToString());
-            return _mapper.Map<IEnumerable<ExchangeOfferDto>>(offers);
-        }
+{
+    var offers = await _offerRepository.GetOffersFilteredAsync(
+        searchDto.MinPrice,
+        searchDto.MaxPrice,
+        searchDto.SubjectId,
+        searchDto.Condition,
+        searchDto.Type,
+        searchDto.Status,
+        searchDto.Keywords);
+    
+    return _mapper.Map<IEnumerable<ExchangeOfferDto>>(offers);
+}
 
         public async Task UpdateOfferStatusAsync(int offerId, OfferStatus newStatus)
         {
@@ -161,4 +171,5 @@ namespace BookExchange.Application.Services
             await _offerRepository.SaveChangesAsync();
         }
     }
+
 }

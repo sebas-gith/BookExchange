@@ -16,7 +16,7 @@ builder.Services.AddDbContext<BookExchangeContext>(options =>
 
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>)); // Genérico
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>)); 
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
@@ -36,8 +36,20 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorFrontend",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5247")  
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 
 var app = builder.Build();
+app.UseCors("AllowBlazorFrontend");
 
 app.UseHttpsRedirection();
 

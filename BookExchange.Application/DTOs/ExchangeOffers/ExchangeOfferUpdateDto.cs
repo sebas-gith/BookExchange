@@ -25,7 +25,7 @@ namespace BookExchange.Application.DTOs.ExchangeOffers
         [StringLength(250, ErrorMessage = "La ubicación no puede exceder los 250 caracteres.")]
         public string Location { get; set; }
 
-        public DateTime? ExpirationDate { get; set; } // Opcional
+        public DateTime? ExpirationDate { get; set; } 
 
         [Required(ErrorMessage = "El estado de la oferta es obligatorio.")]
         public OfferStatus Status { get; set; }

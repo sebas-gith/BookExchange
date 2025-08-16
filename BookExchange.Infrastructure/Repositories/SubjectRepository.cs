@@ -11,7 +11,6 @@ namespace BookExchange.Infrastructure.Repositories
         {
         }
 
-        // Implementación de métodos específicos para Subject
         public async Task<Subject> GetSubjectByNameAsync(string name)
         {
             return await _dbSet.FirstOrDefaultAsync(s => s.Name == name);

@@ -13,7 +13,7 @@ namespace BookExchange.Api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly IStudentService _studentService; // Para poder usar el RegisterStudentAsync
+        private readonly IStudentService _studentService; 
 
         public AuthController(IAuthService authService, IStudentService studentService)
         {
@@ -32,10 +32,10 @@ namespace BookExchange.Api.Controllers
             }
             try
             {
-                var student = await _studentService.RegisterStudentAsync(registerDto); // Usa StudentService para el registro
+                var student = await _studentService.RegisterStudentAsync(registerDto); 
                 return CreatedAtAction(nameof(Register), student);
             }
-            catch (ApplicationException ex)
+            catch (BookExchange.Application.Exceptions.ApplicationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }
@@ -53,9 +53,9 @@ namespace BookExchange.Api.Controllers
             try
             {
                 var studentDto = await _authService.LoginAsync(loginDto);
-                return Ok(studentDto); // Devuelve la información del estudiante
+                return Ok(studentDto);
             }
-            catch (ApplicationException ex)
+            catch (BookExchange.Application.Exceptions.ApplicationException ex)
             {
                 return BadRequest(new { message = ex.Message });
             }

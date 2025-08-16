@@ -13,6 +13,6 @@ namespace BookExchange.Application.DTOs.Messages
         [StringLength(1000, ErrorMessage = "El mensaje no puede exceder los 1000 caracteres.")]
         public string Content { get; set; }
 
-        public int? ExchangeOfferId { get; set; } // Opcional: ID de la oferta relacionada
+        public int? ExchangeOfferId { get; set; } 
     }
 }

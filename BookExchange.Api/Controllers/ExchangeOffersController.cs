@@ -103,7 +103,7 @@ namespace BookExchange.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.Forbidden)] // Si el servicio lanza UnauthorizedAccessException
+        [ProducesResponseType((int)HttpStatusCode.Forbidden)] 
         public async Task<IActionResult> UpdateExchangeOffer(int id, [FromBody] ExchangeOfferUpdateDto updateDto)
         {
             if (id != updateDto.Id)

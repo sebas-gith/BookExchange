@@ -10,7 +10,7 @@ namespace BookExchange.Application.Contracts
         Task<BookDto> CreateBookAsync(BookCreateDto createDto); // Sin ownerId separado
         Task<BookDto> GetBookByIdAsync(int bookId);
         Task<IEnumerable<BookDto>> GetAllBooksAsync();
-        Task UpdateBookAsync(BookUpdateDto updateDto); // Necesitarías un BookUpdateDto similar a StudentUpdateDto
+        Task UpdateBookAsync(BookUpdateDto updateDto);
         Task DeleteBookAsync(int bookId);
         Task<IEnumerable<BookDto>> GetBooksBySubjectAsync(int subjectId);
         Task<IEnumerable<BookDto>> GetBooksByOwnerAsync(int ownerId);

@@ -11,7 +11,7 @@ namespace BookExchange.Infrastructure.Repositories
         {
         }
 
-        // Implementación de métodos específicos para Book
+        
         public async Task<IEnumerable<Book>> GetBooksBySubjectAsync(int subjectId)
         {
             return await _dbSet.Where(b => b.SubjectId == subjectId).ToListAsync();

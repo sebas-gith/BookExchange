@@ -1,4 +1,4 @@
-﻿using BookExchange.Domain.Entities; // Para el enum BookCondition
+﻿using BookExchange.Domain.Entities; 
 using System.ComponentModel.DataAnnotations;
 
 namespace BookExchange.Application.DTOs.Books
@@ -35,6 +35,5 @@ namespace BookExchange.Application.DTOs.Books
         [Required]
         public int SubjectId { get; set; }
 
-        // El OwnerId se obtendría del usuario autenticado, no se pasa en el DTO de creación
     }
 }
