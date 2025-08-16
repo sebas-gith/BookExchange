@@ -49,7 +49,7 @@ BookExchange/
 │   ├── Interfaces/                      # Interfaces de repositorios y servicios
 │   ├── Mappers/                         # Perfiles de AutoMapper
 │   └── Services/                        # Implementaciones de servicios
-├── BookExchange.Client/                 # Proyecto Blazor WebAssembly (Frontend)
+├── BookExchange.Frontend/                 # Proyecto Blazor WebAssembly (Frontend)
 │   ├── Pages/                           # Componentes de página (.razor)
 │   ├── Shared/                          # Componentes compartidos
 │   ├── Program.cs                       # Configuración del HttpClient y otros servicios del cliente
