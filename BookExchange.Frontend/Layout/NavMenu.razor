@@ -1,39 +1,73 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">BookExchange.Frontend</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager navManager
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
 
-<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+<nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm mb-3">
+    <div class="container-fluid">
+        <NavLink class="navbar-brand" href="/">
+            <img src="images/logo.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+            Bootstrap
+        </NavLink>
+
+
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+                <NavLink class="nav-link" style="color: black; margin-left: 20px" href="/" Match="NavLinkMatch.All">
+                    Inicio
+                </NavLink>
+            </li>
+            <li class="nav-item mt-3 mr-3">
+                <NavLink class="nav-link" href="/publish" style="margin-left: 20px; color: black;">
+                    Publicar Libro
+                </NavLink>
+            </li>
+            <li class="nav-item mt-3 ">
+                <NavLink class="nav-link" href="/mybooks" style="margin-left: 20px; color: black;">
+                    Mis Libros
+                </NavLink>
+            </li>
+        </ul>
+
+        <ul class="navbar-nav">
+            <AuthorizeView>
+                <Authorized>
+                    <li class="nav-item ">
+                        <NavLink class="nav-link d-flex align-items-center" style="color: black; margin-right: 20px" href="/Inbox">
+                            <i class="bi bi-chat-left-text"></i>
+                        </NavLink>
+                    </li>
+
+                    <li class="nav-item">
+                        <button class="nav-link btn btn-link" @onclick="Logout">
+                            Salir
+                        </button>
+                    </li>
+                </Authorized>
+                <NotAuthorized>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/login">
+                            Iniciar Sesión
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/register">
+                            Registrarse
+                        </NavLink>
+                    </li>
+                </NotAuthorized>
+            </AuthorizeView>
+        </ul>
+    </div>
+</nav>
 
 @code {
-    private bool collapseNavMenu = true;
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-    private void ToggleNavMenu()
+    private async Task Logout()
     {
-        collapseNavMenu = !collapseNavMenu;
+        await localStorage.ClearAsync();
+        navManager.NavigateTo("/login", true);
     }
 }

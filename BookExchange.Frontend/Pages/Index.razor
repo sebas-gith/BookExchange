@@ -1,0 +1,157 @@
+﻿@page "/"
+@using BookExchange.Application.DTOs.ExchangeOffers
+@using BookExchange.Domain.Entities
+@using BookExchange.Frontend.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject ExchangeOfferService ExchangeOfferService
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3 mb-4 bg-white rounded">
+                <h5 class="card-title text-center mb-3">Filtros de Búsqueda</h5>
+                <EditForm Model="@searchParams" OnSubmit="HandleSearch">
+                    <div class="form-group mb-3">
+                        <label for="keywords" class="form-label">Buscar por Título o Autor</label>
+                        <InputText id="keywords" @bind-Value="searchParams.Keywords" class="form-control" placeholder="Ej. El Principito" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="minPrice" class="form-label">Precio Mínimo</label>
+                        <InputNumber id="minPrice" @bind-Value="searchParams.MinPrice" class="form-control" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="maxPrice" class="form-label">Precio Máximo</label>
+                        <InputNumber id="maxPrice" @bind-Value="searchParams.MaxPrice" class="form-control" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="subjectId" class="form-label">Materia (ID)</label>
+                        <InputNumber id="subjectId" @bind-Value="searchParams.SubjectId" class="form-control" />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="condition" class="form-label">Condición</label>
+                        <InputSelect id="condition" @bind-Value="searchParams.Condition" class="form-control">
+                            <option value="">Cualquiera</option>
+                            @foreach (var condition in Enum.GetValues<BookCondition>())
+                            {
+                                <option value="@condition">@GetConditionString(condition)</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="type" class="form-label">Tipo de Oferta</label>
+                        <InputSelect id="type" @bind-Value="searchParams.Type" class="form-control">
+                            <option value="">Cualquiera</option>
+                            @foreach (var offerType in Enum.GetValues<OfferType>())
+                            {
+                                <option value="@offerType">@offerType.ToString()</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Buscar</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <h3 class="mb-4">Libros Disponibles</h3>
+
+            @if (isLoading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (offers.Any())
+            {
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach (var offer in offers)
+                    {
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">@offer.Book.Title</h5>
+                                    <h6 class="card-subtitle mb-2 text-muted">@offer.Book.Author</h6>
+                                    <p class="card-text">
+                                        <strong>Materia:</strong> @offer.Book.SubjectName <br/>
+                                        <strong>Condición:</strong> @GetConditionString(offer.Book.Condition) <br/>
+
+                                        @if (offer.DesiredBooksForExchange == "N/A")
+                                        {
+                                            <strong>Precio:</strong> @offer.Price
+                                        }
+                                        else
+                                        {
+                                            <strong>Intercambio:</strong> @offer.DesiredBooksForExchange
+                                        }
+                                    </p>
+                                    <div class="mt-auto">
+                                        <button class="btn btn-primary mt-2" @onclick="() => GoToBookDetails(offer.Book.Id)">Ver Detalles</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info" role="alert">
+                    No se encontraron libros que coincidan con la búsqueda.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ExchangeOfferDto> offers = new();
+    private OfferSearchDto searchParams = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await HandleSearch();
+    }
+
+    private async Task HandleSearch()
+    {
+        isLoading = true;
+        try
+        {
+            offers = await ExchangeOfferService.SearchOffersAsync(searchParams);
+        }
+        catch (HttpRequestException)
+        {
+            // Manejar errores de la API
+        }
+        isLoading = false;
+    }
+
+    private string GetConditionString(BookCondition condition)
+    {
+        return condition switch
+        {
+            BookCondition.New => "Nuevo",
+            BookCondition.LikeNew => "Usado - Como Nuevo",
+            BookCondition.UsedGood => "Usado - Buen Estado",
+            BookCondition.UsedFair => "Usado - Aceptable",
+            _ => "Desconocida"
+        };
+    }
+
+    private void GoToBookDetails(int id)
+    {
+        navManager.NavigateTo($"/book/{id}");
+    }
+
+}

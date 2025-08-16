@@ -1,0 +1,102 @@
+﻿@page "/register"
+@inject BookExchange.Frontend.Services.AuthService AuthService
+@using BookExchange.Application.DTOs.Students
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Crear una cuenta</h3>
+
+                    <EditForm Model="@registerDto" OnValidSubmit="@HandleRegister">
+                        <DataAnnotationsValidator />
+
+                        <div class="form-group mb-3">
+                            <label for="firstName" class="form-label">Nombre</label>
+                            <InputText id="firstName" @bind-Value="registerDto.FirstName" class="form-control" placeholder="Introduce tu nombre" />
+                            <ValidationMessage For="@(() => registerDto.FirstName)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="lastName" class="form-label">Apellido</label>
+                            <InputText id="lastName" @bind-Value="registerDto.LastName" class="form-control" placeholder="Introduce tu apellido" />
+                            <ValidationMessage For="@(() => registerDto.LastName)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <InputText id="email" @bind-Value="registerDto.Email" class="form-control" placeholder="ejemplo@correo.com" />
+                            <ValidationMessage For="@(() => registerDto.Email)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <InputText id="password" @bind-Value="registerDto.Password" type="password" class="form-control" placeholder="Introduce tu contraseña" />
+                            <ValidationMessage For="@(() => registerDto.Password)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
+                            <InputText id="confirmPassword" @bind-Value="registerDto.ConfirmPassword" type="password" class="form-control" placeholder="Repite tu contraseña" />
+                            <ValidationMessage For="@(() => registerDto.ConfirmPassword)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="phoneNumber" class="form-label">Teléfono</label>
+                            <InputText id="phoneNumber" @bind-Value="registerDto.PhoneNumber" class="form-control" placeholder="Introduce tu número de teléfono" />
+                            <ValidationMessage For="@(() => registerDto.PhoneNumber)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="campus" class="form-label">Campus</label>
+                            <InputText id="campus" @bind-Value="registerDto.Campus" class="form-control" placeholder="Nombre de tu campus" />
+                            <ValidationMessage For="@(() => registerDto.Campus)" class="text-danger" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3" role="alert">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+                        </div>
+                    </EditForm>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">¿Ya tienes una cuenta? <NavLink href="/login">Inicia sesión aquí</NavLink></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private StudentRegisterDto registerDto = new StudentRegisterDto();
+    private string errorMessage;
+
+    private async Task HandleRegister()
+    {
+        errorMessage = string.Empty; // Limpiar errores previos
+        try
+        {
+            await AuthService.Register(registerDto);
+            // Registro exitoso, redirigir al usuario
+            Navigation.NavigateTo("/login", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            // Este catch maneja errores de la API, como un email ya registrado.
+            errorMessage = "El correo electrónico ya está registrado o los datos son incorrectos.";
+            // Para una depuración más avanzada, puedes leer el cuerpo de la respuesta para obtener el mensaje de error específico de la API.
+        }
+        catch (Exception)
+        {
+            errorMessage = "Ocurrió un error inesperado. Por favor, inténtalo de nuevo.";
+        }
+    }
+}

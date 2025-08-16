@@ -1,0 +1,118 @@
+﻿@page "/mybooks"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.Books
+@using BookExchange.Application.DTOs.Students
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@inject BookService BookService
+@inject ILocalStorageService localStorage
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <h3 class="mb-4">Mis Libros Publicados</h3>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (myBooks.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @foreach (var book in myBooks)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@book.Title</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@book.Author</h6>
+                            <p class="card-text">
+                                <strong>Materia:</strong> @book.SubjectName <br />
+                                <strong>Condición:</strong> @GetConditionString(BookCondition.LikeNew)
+                            </p>
+                            <div class="mt-auto d-flex justify-content-end">
+                                <a href="/book/@book.Id" class="btn btn-secondary me-2">Ver Detalles</a>
+                                <a href="/editbook/@book.Id" class="btn btn-warning me-2">Editar</a>
+                                <button class="btn btn-danger" @onclick="() => DeleteBook(book.Id)">Eliminar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+
+            }
+        </div>
+
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            Aún no has publicado ningún libro. <a href="/publish">¡Publica uno ahora!</a>
+        </div>
+    }
+</div>
+
+@code {
+    private List<BookDto> myBooks = new();
+    private bool isLoading = true;
+    private int currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+            if (user != null)
+            {
+                currentUserId = user.Id;
+                var allBooks = await BookService.GetBooksAsync();
+                myBooks = allBooks.Where(b => b.OwnerId == currentUserId).ToList();
+            }
+            else
+            {
+                navManager.NavigateTo("/login");
+            }
+        }
+        catch (HttpRequestException)
+        {
+           
+        }
+        isLoading = false;
+    }
+
+    private string GetConditionString(BookCondition condition)
+    {
+        return condition switch
+        {
+            BookCondition.New => "Nuevo",
+            BookCondition.LikeNew => "Usado - Como Nuevo",
+            BookCondition.UsedGood => "Usado - Buen Estado",
+            BookCondition.UsedFair => "Usado - Aceptable",
+            _ => "Desconocida"
+        };
+    }
+
+    private async Task DeleteBook(int bookId)
+    {
+        // Puedes agregar una confirmación aquí antes de eliminar
+        // var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "Estás seguro de que quieres eliminar este libro?");
+        // if (confirmed) { ... }
+
+        try
+        {
+            await BookService.DeleteBookAsync(bookId);
+            // Si la eliminación fue exitosa, recarga la lista de libros
+            await OnInitializedAsync();
+        }
+        catch (HttpRequestException)
+        {
+            // Manejar error de la API
+        }
+    }
+}

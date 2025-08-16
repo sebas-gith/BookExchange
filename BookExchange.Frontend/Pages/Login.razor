@@ -1,0 +1,66 @@
+﻿@page "/login"
+@using BookExchange.Application.DTOs.Auth
+@using BookExchange.Frontend.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h3>Iniciar Sesión</h3>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@loginDto" OnValidSubmit="@HandleLogin">
+                        <DataAnnotationsValidator />
+                        <div class="form-group mb-3">
+                            <label for="email">Correo electrónico</label>
+                            <InputText id="email" @bind-Value="loginDto.Email" class="form-control" placeholder="ejemplo@correo.com" />
+                            <ValidationMessage For="@(() => loginDto.Email)" />
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="password">Contraseña</label>
+                            <InputText id="password" @bind-Value="loginDto.Password" type="password" class="form-control" placeholder="Introduce tu contraseña" />
+                            <ValidationMessage For="@(() => loginDto.Password)" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger" role="alert">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <button type="submit" class="btn btn-success btn-block">Entrar</button>
+                    </EditForm>
+                </div>
+                <div class="card-footer text-center">
+                    <p>¿No tienes una cuenta? <NavLink href="/register">Regístrate</NavLink></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginDto loginDto = new LoginDto();
+    private string errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var student = await AuthService.Login(loginDto);
+            if (student != null)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }catch(BookExchange.Application.Exceptions.ApplicationException ex)
+        {
+            errorMessage = "Credenciales inválidas. Por favor, inténtalo de nuevo.";
+        }
+
+        
+    }
+}

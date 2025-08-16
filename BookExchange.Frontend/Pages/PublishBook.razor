@@ -1,0 +1,131 @@
+﻿@page "/publish"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.Books
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@using System.ComponentModel.DataAnnotations
+@using BookExchange.Application.DTOs.Students
+@inject BookService bookService
+@inject SubjectService subjectService
+@inject ILocalStorageService localStorage
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Publicar un Nuevo Libro</h3>
+
+                    <EditForm Model="@book" OnValidSubmit="HandlePublish">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="form-group mb-3">
+                            <label for="title" class="form-label">Título del Libro</label>
+                            <InputText id="title" @bind-Value="book.Title" class="form-control" />
+                            <ValidationMessage For="@(() => book.Title)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="author" class="form-label">Autor</label>
+                            <InputText id="author" @bind-Value="book.Author" class="form-control" />
+                            <ValidationMessage For="@(() => book.Author)" class="text-danger" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="isbn" class="form-label">ISBN</label>
+                                <InputText id="isbn" @bind-Value="book.ISBN" class="form-control" placeholder="ISBN de 10 o 13 dígitos" />
+                                <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
+                            </div>
+                            <div class="col-md-6 form-group mb-3">
+                                <label for="publicationYear" class="form-label">Año de Publicación</label>
+                                <InputNumber id="publicationYear" @bind-Value="book.PublicationYear" class="form-control" />
+                                <ValidationMessage For="@(() => book.PublicationYear)" class="text-danger" />
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="edition" class="form-label">Edición</label>
+                            <InputText id="edition" @bind-Value="book.Edition" class="form-control" />
+                            <ValidationMessage For="@(() => book.Edition)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="condition" class="form-label">Condición del Libro</label>
+                            <InputSelect id="condition" @bind-Value="book.Condition" class="form-control">
+                                <option value="@BookCondition.New">Nuevo</option>
+                                 <option value="@BookCondition.UsedGood">Usado - Buen Estado</option>
+                                <option value="@BookCondition.UsedFair">Usado - Aceptable</option>
+                                <option value="@BookCondition.LikeNew">Usado - Como nuevo</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => book.Condition)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="description" class="form-label">Descripción</label>
+                            <InputTextArea id="description" @bind-Value="book.Description" class="form-control" placeholder="Describe el estado del libro (ej. tiene anotaciones, está subrayado, etc.)" />
+                            <ValidationMessage For="@(() => book.Description)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label">Materia</label>
+                            <InputSelect class="form-select" @bind-Value="book.SubjectId">
+                                <option value="0" disabled>-- Seleccione una materia --</option>
+                                @foreach (var s in subjects)
+                                {
+                                    <option value="@s.Id">@s.Name</option>
+                                }
+                            </InputSelect>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessage</div>
+                        }
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">Publicar Libro</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private BookCreateDto book = new BookCreateDto();
+    private List<Subject> subjects = new List<Subject>();
+
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // El OwnerId se obtiene del usuario logueado en el LocalStorage
+        var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+        subjects = await subjectService.GetSubjectsAsync();
+        Console.WriteLine(subjects.Count);
+        if (user != null)
+        {
+            book.OwnerId = user.Id;
+        }
+    }
+
+    private async Task HandlePublish()
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            await bookService.CreateBookAsync(book);
+            // Si la publicación fue exitosa, redirige a la página principal
+            navManager.NavigateTo("/", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Error al publicar el libro: {ex.Message}";
+        }
+    }
+}

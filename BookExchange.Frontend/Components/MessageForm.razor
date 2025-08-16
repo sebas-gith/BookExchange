@@ -1,0 +1,65 @@
+﻿@using BookExchange.Application.DTOs.Messages
+@using BookExchange.Application.DTOs.Students
+@using BookExchange.Frontend.Services
+@using Blazored.LocalStorage
+@inject MessageService MessageService
+@inject ILocalStorageService localStorage
+@inject NavigationManager navManager
+
+<div class="card p-4 shadow-sm">
+    <h5 class="card-title text-center mb-4">Enviar Mensaje</h5>
+
+    @if (string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
+
+    <EditForm Model="@messageCreateDto" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        <div class="form-group mb-3">
+            <InputTextArea id="content" @bind-Value="messageCreateDto.Content" class="form-control" placeholder="Escribe tu mensaje aquí..." rows="4" />
+            <ValidationMessage For="@(() => messageCreateDto.Content)" class="text-danger" />
+        </div>
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int ReceiverId { get; set; }
+
+    private MessageCreateDto messageCreateDto = new();
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+        if (user == null)
+        {
+            navManager.NavigateTo("/login");
+        }
+        else
+        {
+            messageCreateDto.SenderId = user.Id;
+            messageCreateDto.ReceiverId = ReceiverId;
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            await MessageService.SendMessageAsync(messageCreateDto);
+            navManager.NavigateTo(navManager.Uri, forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Error al enviar el mensaje: {ex.Message}";
+        }
+    }
+}

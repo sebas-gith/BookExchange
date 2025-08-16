@@ -1,0 +1,115 @@
+﻿@page "/book/{id:int}"
+@using BookExchange.Application.DTOs.Books
+@using BookExchange.Application.DTOs.Students
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Domain.Entities
+@using BookExchange.Frontend.Services
+@inject BookService BookService
+@inject NavigationManager navManager
+@using Blazored.LocalStorage
+@inject ILocalStorageService localStorage
+
+<div class="container mt-5">
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (book != null)
+    {
+        <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">@book.Title</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Autor:</strong> @book.Author</p>
+                        <p><strong>ISBN:</strong> @book.ISBN</p>
+                        <p><strong>Año de Publicación:</strong> @book.PublicationYear</p>
+                        <p><strong>Edición:</strong> @book.Edition</p>
+                        <p><strong>Materia:</strong> @book.SubjectName</p>
+                        <p><strong>Condición:</strong> @GetConditionString(book.Condition)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Descripción:</strong></p>
+                        <p>@book.Description</p>
+                        <hr />
+                        <h5 class="card-subtitle mb-2 text-muted">Información del Vendedor</h5>
+                        <p><strong>Propietario:</strong> @book.OwnerFirstName @book.OwnerLastName</p>
+                        @if (book.OwnerId != currentUserId)
+                        {
+                            <MessageForm ReceiverId="@book.OwnerId" />
+                        }
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Descripción:</strong></p>
+                    <p>@book.Description</p>
+                    <hr />
+                    <h5 class="card-subtitle mb-2 text-muted">Información del Vendedor</h5>
+                    <p><strong>Propietario:</strong> @book.OwnerFirstName @book.OwnerLastName</p>
+
+                    @if (book.OwnerId == currentUserId)
+                    {
+                        <a href="/book/@book.Id/createoffer" class="btn btn-success mt-2">Crear Oferta</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning" role="alert">
+            No se encontró el libro con ID @Id.
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private BookDto book;
+    private bool isLoading = true;
+    private int currentUserId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            // Llama al servicio para obtener los detalles del libro por su ID
+            book = await BookService.GetBookByIdAsync(Id);
+            var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+            if (user != null)
+            {
+                currentUserId = user.Id;
+            }
+
+            book = await BookService.GetBookByIdAsync(Id);
+        }
+        catch (HttpRequestException)
+        {
+            // Manejar errores si no se puede obtener el libro
+            book = null;
+        }
+        isLoading = false;
+
+    }
+
+
+    private string GetConditionString(BookCondition condition)
+    {
+        return condition switch
+        {
+            BookCondition.New => "Nuevo",
+            BookCondition.LikeNew => "Usado - Como Nuevo",
+            BookCondition.UsedGood => "Usado - Buen Estado",
+            BookCondition.UsedFair => "Usado - Aceptable",
+            _ => "Desconocida"
+        };
+    }
+}

@@ -1,0 +1,113 @@
+﻿@page "/book/{bookId:int}/createoffer"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.ExchangeOffers
+@using BookExchange.Application.DTOs.Students
+@using BookExchange.Domain.Entities
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@inject ExchangeOfferService offerService
+@inject ILocalStorageService localStorage
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                <div class="card-body">
+                    <h3 class="card-title text-center mb-4">Crear Nueva Oferta</h3>
+
+                    <EditForm Model="@offer" OnValidSubmit="HandleSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <div class="form-group mb-3">
+                            <label for="type" class="form-label">Tipo de Oferta</label>
+                            <InputSelect id="type" @bind-Value="offer.Type" class="form-control">
+                                <option value="@OfferType.Sale">Venta</option>
+                                <option value="@OfferType.Exchange">Intercambio</option>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => offer.Type)" class="text-danger" />
+                        </div>
+
+                        @if (offer.Type == OfferType.Sale)
+                        {
+                            <div class="form-group mb-3">
+                                <label for="price" class="form-label">Precio</label>
+                                <InputNumber id="price" @bind-Value="offer.Price" class="form-control" />
+                                <ValidationMessage For="@(() => offer.Price)" class="text-danger" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="form-group mb-3">
+                                <label for="desiredBooks" class="form-label">Libros Deseados para Intercambio</label>
+                                <InputTextArea id="desiredBooks" @bind-Value="offer.DesiredBooksForExchange" class="form-control" placeholder="Ej: Busco 'Cien Años de Soledad', 'El Túnel', o libros de ciencia ficción." />
+                                <ValidationMessage For="@(() => offer.DesiredBooksForExchange)" class="text-danger" />
+                            </div>
+                        }
+
+                        <div class="form-group mb-3">
+                            <label for="location" class="form-label">Ubicación</label>
+                            <InputText id="location" @bind-Value="offer.Location" class="form-control" placeholder="Ej: Campus Central, Biblioteca, etc." />
+                            <ValidationMessage For="@(() => offer.Location)" class="text-danger" />
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="expirationDate" class="form-label">Fecha de Expiración (Opcional)</label>
+                            <InputDate id="expirationDate" @bind-Value="offer.ExpirationDate" class="form-control" />
+                            <ValidationMessage For="@(() => offer.ExpirationDate)" class="text-danger" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger mt-3">@errorMessage</div>
+                        }
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">Publicar Oferta</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int bookId { get; set; }
+
+    private ExchangeOfferCreateDto offer = new();
+    private string errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // El SellerId se obtiene del usuario logueado en el LocalStorage
+        var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+        if (user != null)
+        {
+            offer.SellerId = user.Id;
+            offer.BookId = bookId; // Asigna el BookId de la URL
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+        try
+        {
+            if(offer.DesiredBooksForExchange == null)
+            {
+                offer.DesiredBooksForExchange = "N/A";
+            }
+            await offerService.CreateOfferAsync(offer);
+            // Redirige al usuario a la página del libro después de la publicación
+            navManager.NavigateTo($"/book/{bookId}", forceLoad: true);
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = $"Error al publicar la oferta: {ex.Message}";
+        }
+    }
+}

@@ -1,0 +1,164 @@
+﻿@page "/editbook/{id:int}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.Books
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@using System.ComponentModel.DataAnnotations
+@using BookExchange.Application.DTOs.Students
+@inject BookService bookService
+@inject ILocalStorageService localStorage
+@inject SubjectService subjectService
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (bookUpdateDto != null)
+    {
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg p-3 mb-5 bg-white rounded">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">Editar Libro: @bookUpdateDto.Title</h3>
+
+                        <EditForm Model="@bookUpdateDto" OnValidSubmit="HandleUpdate">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="text-danger" />
+
+                            <div class="form-group mb-3">
+                                <label for="title" class="form-label">Título del Libro</label>
+                                <InputText id="title" @bind-Value="bookUpdateDto.Title" class="form-control" />
+                                <ValidationMessage For="@(() => bookUpdateDto.Title)" class="text-danger" />
+                            </div>
+                            <div class="form-group mb-3">
+                                <label for="author" class="form-label">Autor</label>
+                                <InputText id="author" @bind-Value="bookUpdateDto.Author" class="form-control" />
+                                <ValidationMessage For="@(() => bookUpdateDto.Author)" class="text-danger" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="isbn" class="form-label">ISBN</label>
+                                    <InputText id="isbn" @bind-Value="bookUpdateDto.ISBN" class="form-control" placeholder="ISBN de 10 o 13 dígitos" />
+                                    <ValidationMessage For="@(() => bookUpdateDto.ISBN)" class="text-danger" />
+                                </div>
+                                <div class="col-md-6 form-group mb-3">
+                                    <label for="publicationYear" class="form-label">Año de Publicación</label>
+                                    <InputNumber id="publicationYear" @bind-Value="bookUpdateDto.PublicationYear" class="form-control" />
+                                    <ValidationMessage For="@(() => bookUpdateDto.PublicationYear)" class="text-danger" />
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="edition" class="form-label">Edición</label>
+                                <InputText id="edition" @bind-Value="bookUpdateDto.Edition" class="form-control" />
+                                <ValidationMessage For="@(() => bookUpdateDto.Edition)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="condition" class="form-label">Condición del Libro</label>
+                                <InputSelect id="condition" @bind-Value="bookUpdateDto.Condition" class="form-control">
+                                    <option value="@BookCondition.New">Nuevo</option>
+                                    <option value="@BookCondition.UsedGood">Usado - Buen Estado</option>
+                                    <option value="@BookCondition.UsedFair">Usado - Aceptable</option>
+                                    <option value="@BookCondition.LikeNew">Usado - Como nuevo</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => bookUpdateDto.Condition)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label for="description" class="form-label">Descripción</label>
+                                <InputTextArea id="description" @bind-Value="bookUpdateDto.Description" class="form-control" placeholder="Describe el estado del libro (ej. tiene anotaciones, está subrayado, etc.)" />
+                                <ValidationMessage For="@(() => bookUpdateDto.Description)" class="text-danger" />
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label class="form-label">Materia</label>
+                                <InputSelect class="form-select" @bind-Value="bookUpdateDto.SubjectId">
+                                    <option value="0" disabled>-- Seleccione una materia --</option>
+                                    @foreach (var s in subjects)
+                                    {
+                                        <option value="@s.Id">@s.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="d-grid gap-2 mt-4">
+                                <button type="submit" class="btn btn-warning btn-lg">Guardar Cambios</button>
+                                <button type="button" class="btn btn-secondary btn-lg" @onclick="NavigateToMyBooks">Cancelar</button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger">No se pudo cargar la información del libro.</div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+    private List<Subject> subjects = new List<Subject>();
+    private BookUpdateDto bookUpdateDto;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Obtiene el libro del servicio
+            var book = await bookService.GetBookByIdAsync(Id);
+            subjects = await subjectService.GetSubjectsAsync();
+            // Asigna los datos del libro al DTO de actualización
+              bookUpdateDto = new BookUpdateDto
+            {
+                Id = book.Id,
+                Title = book.Title,
+                Author = book.Author,
+                ISBN = book.ISBN,
+                PublicationYear = book.PublicationYear,
+                Edition = book.Edition,
+                Condition = book.Condition,
+                Description = book.Description,
+                SubjectId = book.SubjectId,
+                OwnerId = book.OwnerId
+            };
+        }
+        catch (HttpRequestException)
+        {
+            bookUpdateDto = null;
+        }
+        isLoading = false;
+    }
+
+    private async Task HandleUpdate()
+    {
+        try
+        {
+
+            await bookService.UpdateBookAsync(bookUpdateDto);
+            // Redirige a la página de mis libros después de la actualización
+            navManager.NavigateTo("/mybooks");
+        }
+        catch (HttpRequestException)
+        {
+            // Maneja el error de la API
+        }
+    }
+    
+    private void NavigateToMyBooks()
+    {
+        navManager.NavigateTo("/mybooks");
+    }
+}

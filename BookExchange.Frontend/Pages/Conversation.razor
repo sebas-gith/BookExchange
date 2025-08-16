@@ -1,0 +1,109 @@
+﻿@page "/conversation/{otherUserId:int}"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.Messages
+@using BookExchange.Application.DTOs.Students
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@inject ILocalStorageService localStorage
+@inject MessageService messageService
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <h3 class="mb-4">Conversación con: @conversationPartnerName</h3>
+
+    <div class="card p-3 mb-4" style="height: 500px; overflow-y: auto;">
+        @if (isLoading)
+        {
+            <div class="d-flex justify-content-center my-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else if (messages.Any())
+        {
+            @foreach (var message in messages.OrderBy(m => m.SentDate))
+            {
+                <div class="@(message.SenderId == currentUserId ? "text-end" : "text-start") mb-2">
+                    <div class="p-2 rounded d-inline-block" style="background-color: @(message.SenderId == currentUserId ? "#d1e7dd" : "#f8f9fa"); max-width: 80%;">
+                        <small class="text-muted">@(message.SenderId == currentUserId ? "Yo" : message.Sender?.FirstName):</small>
+                        <p class="mb-0">@message.Content</p>
+                        <small class="text-muted" style="font-size: 0.7em;">@message.SentDate.ToString("t")</small>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center text-muted mt-5">No hay mensajes en esta conversación.</div>
+        }
+    </div>
+
+    <EditForm Model="@newMessage" OnValidSubmit="HandleSendMessage">
+        <DataAnnotationsValidator />
+        <div class="input-group">
+            <InputTextArea @bind-Value="newMessage.Content" class="form-control" placeholder="Escribe un mensaje..." rows="1" />
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </div>
+        <ValidationMessage For="@(() => newMessage.Content)" class="text-danger" />
+    </EditForm>
+</div>
+
+@code {
+    [Parameter]
+    public int otherUserId { get; set; }
+
+    private List<MessageDto> messages = new();
+    private MessageCreateDto newMessage = new();
+    private bool isLoading = true;
+    private int currentUserId;
+    private string conversationPartnerName;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+        if (user == null)
+        {
+            navManager.NavigateTo("/login");
+            return;
+        }
+        currentUserId = user.Id;
+        newMessage.SenderId = currentUserId;
+        newMessage.ReceiverId = otherUserId;
+
+        await LoadConversation();
+    }
+
+    private async Task LoadConversation()
+    {
+        isLoading = true;
+        try
+        {
+            // El servicio ahora utiliza el endpoint 'between-users' con los IDs del usuario actual y el otro usuario
+            var conversation = await messageService.GetConversationAsync(currentUserId, otherUserId);
+            messages = conversation.ToList();
+
+            // ... resto del código para obtener el nombre del compañero de conversación
+        }
+        catch (HttpRequestException)
+        {
+            messages = new List<MessageDto>();
+        }
+        isLoading = false;
+    }
+
+    private async Task HandleSendMessage()
+    {
+        if (string.IsNullOrWhiteSpace(newMessage.Content)) return;
+
+        try
+        {
+            await messageService.SendMessageAsync(newMessage);
+            newMessage.Content = string.Empty;
+            await LoadConversation(); // Recargar la conversación para ver el nuevo mensaje
+        }
+        catch (HttpRequestException)
+        {
+            // Manejar error de envío
+        }
+    }
+}

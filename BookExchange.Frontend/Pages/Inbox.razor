@@ -1,0 +1,108 @@
+﻿@page "/inbox"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@using BookExchange.Application.DTOs.Messages
+@using BookExchange.Application.DTOs.Students
+@using Blazored.LocalStorage
+@using BookExchange.Frontend.Services
+@inject ILocalStorageService localStorage
+@inject MessageService messageService
+@inject StudentService studentService // Inyecta el servicio de estudiantes
+@inject NavigationManager navManager
+
+<div class="container mt-5">
+    <h3 class="mb-4">Bandeja de Entrada</h3>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+        </div>
+    }
+    else if (conversations.Any())
+    {
+        <div class="list-group">
+            @foreach (var conversation in conversations)
+            {
+                <a href="/conversation/@conversation.PartnerId" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">@conversation.PartnerName</h5>
+                        <small class="text-muted">
+                            @(conversation.LastMessage.SenderId == currentUserId ? "Yo: " : "")
+                            @conversation.LastMessage.Content
+                        </small>
+                    </div>
+                    <small>@conversation.LastMessage.SentDate.ToShortDateString()</small>
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No tienes conversaciones.
+        </div>
+    }
+</div>
+
+@code {
+    private bool isLoading = true;
+    private int currentUserId;
+    private List<ConversationSummary> conversations = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            var user = await localStorage.GetItemAsync<StudentDto>("currentUser");
+            if (user == null)
+            {
+                navManager.NavigateTo("/login");
+                return;
+            }
+            currentUserId = user.Id;
+
+            // En un escenario real, tu API debería tener un endpoint para esto.
+            // Aquí, lo simulamos obteniendo todas las conversaciones una por una.
+            // NOTA: Esto no es eficiente para muchos usuarios.
+            var allUsers = await studentService.GetAllStudentsAsync(); // Asume que existe un método para esto.
+
+            var partnerIds = allUsers.Where(s => s.Id != currentUserId).Select(s => s.Id).ToList();
+
+            foreach (var partnerId in partnerIds)
+            {
+                var messages = await messageService.GetConversationAsync(currentUserId, partnerId);
+                if (messages.Any())
+                {
+                    var lastMessage = messages.OrderByDescending(m => m.SentDate).First();
+                    var partnerName = messages.First(m => m.SenderId == partnerId)?.Sender.FirstName ?? messages.First(m => m.ReceiverId == partnerId)?.Receiver.FirstName;
+
+                    conversations.Add(new ConversationSummary
+                        {
+                            PartnerId = partnerId,
+                            PartnerName = partnerName,
+                            LastMessage = lastMessage
+                        });
+                }
+            }
+        }
+        catch (HttpRequestException)
+        {
+            // Manejar error de conexión
+        }catch (Exception)
+        {
+            
+        }
+        isLoading = false;
+    }
+
+    public class ConversationSummary
+    {
+        public int PartnerId { get; set; }
+        public string PartnerName { get; set; }
+        public MessageDto LastMessage { get; set; }
+    }
+}
